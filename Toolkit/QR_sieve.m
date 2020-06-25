@@ -3,7 +3,7 @@
 % This version uses GA, instead of fmincon
 % Haoyang Liu
 % 12/09/2018
-function [WLS] = QR_sieve(X, y, ntau, n_WLS_iter, upper, lower, para_dist_default, A, b, estimate_pl)
+function [WLS] = QR_sieve(X, y, ntau, n_WLS_iter, upper, lower, para_dist_default, A, b, do_mle)
 
 % Generate the grid of knots for tau
 
@@ -11,9 +11,15 @@ function [WLS] = QR_sieve(X, y, ntau, n_WLS_iter, upper, lower, para_dist_defaul
 % taugrid_midpoint is the mid point of tau segments
 % taugrid_ue is the new uneven grid
 
-% Question: Currenetly taugrid_midpoint is not used. Is there another
+% Question: Currently taugrid_midpoint is not used. Is there another
 % formulation where we use the midpoints and that's why it's calculated?
 
+% TODO: Figure out how to avoid calculating this inside the function
+
+% Note to John: taugrid is for the piecewise constant MLE and the WLS since 
+% we have to sort the results, and an equal grid ensures an invariant log 
+% likelihood. taugrid_ue is for the piecewise linear MLE calculations since
+% grid intervals won't matter.
 [taugrid, taugrid_midpoint, taugrid_ue] = calculate_grid(ntau);
 
 % Part B) Preallocation of result variables
@@ -33,15 +39,15 @@ X_mean = mean(X);
 % Part E) qreg and WLS
 [fit] = quantlsfVector(X,y,taugrid);
 WLS =  WLS_step(fit,X,y,n_WLS_iter);
-    
-% Part F) MLE
-start = [WLS, para_dist_default];
-% TODO: Unfreeze the minimizing function
-% TODO: Decide if we want to save fval and exitflag
-options=optimoptions(@fmincon,'GradObj','on');
-[fit_hat] = fmincon(@(x)gradllfCovarparavector(x, ntau, nsample, nmixtures,1,y, X),start,A,b,[],[],lower,upper,[],options);
 
-if estimate_pl
+if do_mle
+    
+    % Part F) MLE
+    start = [WLS, para_dist_default];
+    % TODO: Unfreeze the minimizing function
+    % TODO: Decide if we want to save fval and exitflag
+    options=optimoptions(@fmincon,'GradObj','on');
+    [fit_hat] = fmincon(@(x)gradllfCovarparavector(x, ntau, nsample, nmixtures,1,y, X),start,A,b,[],[],lower,upper,[],options);
         
     % G) Piecewise linear MLE
     % G-1) Sort piecewise constant result
@@ -57,8 +63,12 @@ if estimate_pl
     % TODO: Again, allow the user to specify their own minimizer
     opts = optimoptions('ga', 'MaxGenerations',500,'PopulationSize',500);
     opts.InitialPopulationMatrix = start;
-    [fit_hat] = ga(@(x)gradl_CDF_Lei_GA_ue(x,  taugrid_ue, nmixtures, y', X'), nvars, A, b,[],[],lower_pl,upper_pl,[],opts);
+    [fit_hat] = ga(@(x)gradl_CDF_Lei_GA_ue(x, taugrid_ue, nmixtures, y', X'), nvars, A, b,[],[],lower,upper,[],opts);
+    
+    betas = reconstruct_beta((reshape(fit_hat(1,[1:(ncovar*ntau)]), [ntau, ncovar]))');
+    
+else
+    
+    betas = WLS;
     
 end
-
-betas = reconstruct_beta((reshape(fit_hat(1,[1:(ncovar*ntau)]), [ntau, ncovar]))');
