@@ -13,11 +13,11 @@ ntau = 15;
 n_WLS_iter = 40;
 
 % Part B) Preallocation of result variables
-nsample = 100000;
+nsample = 1000;
 % number of covariates for the regression
 ncovar = 3;
 %number of mixture components, using mixture of normals
-nmixtures=3;
+nmixtures = 3;
 %number of true components
 nmixtures_truth = 3;
 % nvars is the total number of parameters
