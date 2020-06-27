@@ -1,0 +1,1 @@
+This folder contains all the code given to me at the start of this project. The idea is to pull the needed functions out of this folder into their correct locations as needed, then for this whole folder to be deleted.
