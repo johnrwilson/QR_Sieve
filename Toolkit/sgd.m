@@ -27,7 +27,7 @@ for i = 1:n_epochs
         end
         
         [~, gradient] = f(x, y_batch, X_batch);
-        x = x - learning_rate * gradient
+        x = x - learning_rate * gradient;
         
     end
     
