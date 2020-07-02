@@ -3,7 +3,7 @@
 % This version uses GA, instead of fmincon
 % Haoyang Liu
 % 12/09/2018
-function [betas, fit_hat] = QR_sieve(X, y, ntau, n_WLS_iter, upper, lower, para_dist_default, A, b, do_mle)
+function [betas] = QR_sieve(X, y, ntau, n_WLS_iter, upper, lower, para_dist_default, A, b, do_mle, n_batches, n_epochs, learning_rate)
 
 % Generate the grid of knots for tau
 
@@ -48,10 +48,12 @@ if do_mle
     % TODO: Decide if we want to save fval and exitflag
     options=optimoptions(@fmincon,'GradObj','on');
     [fit_hat] = fmincon(@(x)gradllfCovarparavector(x, ntau, nmixtures,1,y, X),start,A,b,[],[],lower,upper,[],options);
-    disp("finished first MLE")
+    disp("finished first MLE sgd")
     [loss, ~] = gradllfCovarparavector(fit_hat, ntau, nmixtures,1,y, X);
-    betas = (reshape(fit_hat(1,[1:(ncovar*ntau)]), [ntau, ncovar]))';
+%     disp(loss);
+%     disp(fit_hat);
         
+    
     % G) Piecewise linear MLE
     % G-1) Sort piecewise constant result
     WLS_start_reshape = reshape(fit_hat(1:ntau*ncovar),ntau,ncovar);
@@ -64,17 +66,22 @@ if do_mle
     start = [fit_1_temp, fit_hat([(end - 3*nmixtures + 3) : end])];
 
     % TODO: Again, allow the user to specify their own minimizer
-    opts = optimoptions('ga', 'MaxGenerations',500,'PopulationSize',500);
-    opts.InitialPopulationMatrix = start;
-    [fit_hat] = ga(@(x)gradl_CDF_Lei_GA_ue(x, taugrid_ue, nmixtures, y', X'), nvars, A, b,[],[],lower,upper,[],opts);
-    betas = reconstruct_beta((reshape(fit_hat(1,[1:(ncovar*ntau)]), [ntau, ncovar]))');
+    [loss, grad] = gradl_CDF_Lei_GA_ue(start, taugrid_ue, nmixtures,y', X');
+    disp("Loss and gradient at initial value")
+    disp(loss)
+    disp(grad)
+    f = @(x,y,X) gradl_CDF_Lei_GA_ue(x, taugrid_ue, nmixtures, y', X');
+    verbose = true;
+    [fit_hat] = sgd(f, start, y, X, n_batches, n_epochs, learning_rate, verbose);
     
-    disp("finished second MLE")
+    betas = reconstruct_beta((reshape(fit_hat(1,[1:(ncovar*ntau)]), [ntau, ncovar]))');
+%     disp(fit_hat(ncovar*ntau+1:end))
+    disp("finished second MLE sgd")
+    [loss, ~] = gradl_CDF_Lei_GA_ue(fit_hat, taugrid_ue, nmixtures,y', X');
+    disp(loss);
     
 else
     
-    disp("We are returning the WLS stuff here")
     betas = WLS;
-    fit_hat = WLS;
     
 end

@@ -13,7 +13,7 @@ ntau = 15;
 n_WLS_iter = 40;
 
 % Part B) Preallocation of result variables
-nsample = 1000;
+nsample = 100;
 % number of covariates for the regression
 ncovar = 3;
 %number of mixture components, using mixture of normals
@@ -90,9 +90,45 @@ X = [ones(1,nsample); x1r; x2r]';
 
 % TODO: Make sure the code can handle the MLE calculations by running on
 % server
+n_batches = 10;
+n_epochs = 5;
+learning_rate = 0.001;
+    
 do_mle = false;
 
-betas_WLS_only = QR_sieve(X, y, ntau, n_WLS_iter, upper, lower, para_dist_default, A, b, do_mle);
+% betas_WLS_only = QR_sieve_test_sgd(X, y, ntau, n_WLS_iter, upper, lower, para_dist_default, A, b, do_mle, n_batches, n_epochs, learning_rate);
+
+do_mle = true;
+
+% betas_sgd = QR_sieve_test_sgd(X, y, ntau, n_WLS_iter, upper, lower, para_dist_default, A, b, do_mle, n_batches, n_epochs, learning_rate);
+
+[betas_mle, fit_hat] = QR_sieve(X, y, ntau, n_WLS_iter, upper, lower, para_dist_default, A, b, do_mle);
+
+
 
 % TODO: Plot the results in a way comparable to figures 1 and 2 from the
 % paper
+
+% if pl == 3
+%     x1vector = [0:0.2:2*2.34];
+%     x2vector = 2*2.34*(x1vector/(2*2.34)).^2;
+%   
+%     for j_tau = [2 8 14]
+%         figure; 
+%         hold on; 
+%         plot(x1vector, beta_true(1,j_tau) + beta_true(2,j_tau)*x1vector + beta_true(3,j_tau)*x2vector,'b');
+%         plot(x1vector, beta_qreg_full(1,j_tau) + beta_qreg_full(2,j_tau)*x1vector,'m');
+%         plot(x1vector, beta_qreg_full_1(1,j_tau) + beta_qreg_full_1(2,j_tau)*x1vector,'m--'); 
+%         plot(x1vector, beta_WLS_start_sorted_full(1,j_tau) + beta_WLS_start_sorted_full(2,j_tau)*x1vector,'k'); 
+%         
+%        lgd = legend('truth','quantile regression','quantile regression ystar','piecewise linear(fmincon)');  
+%        c = lgd.Location;
+%        lgd.Location = 'northwest';
+%        title(sprintf('Q-tau(Y|X) tau = %0.1g',taugrid_ue(j_tau)))
+%        print('-dpng','-r200',sprintf('qyx%d',j_tau));
+%  
+%     end
+%  
+% end
+
+% plot(betas_mle(2,:))

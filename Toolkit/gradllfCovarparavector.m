@@ -1,9 +1,9 @@
-function [lf,g] = gradllfCovarparavector(parametervectorPre,ntau, nsample, nmixtures, nslice, yt,X)
+function [lf,g] = gradllfCovarparavector(parametervectorPre, ntau, nmixtures, nslice, yt, X)
 % Calculate the gradient of llf1
 % To Calculate the gradient of llf1, it is necessary to calculate llf1. So
 % might as well add llf1 as an output to this function.
 
-[temp,ncovar] = size(X);
+[nsample,ncovar] = size(X);
 %log-likelihood function, defined as llf1.
 
 % Extract the parameters
