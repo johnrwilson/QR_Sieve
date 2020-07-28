@@ -13,7 +13,6 @@ function [cdf_lf, cdf_g] = gradl_CDF_nopre_Lei_1_ue(para, ParameterDist_nopre, t
     % Size of erroreachsample is # of observations times # of taus
     erroreachsample = repmat(Y, [(ntau+1) 1]) - est_level'*X;
 
-
     % B) Construct xB matrix (this section is clear and understood)
     % xB_k corresponds to xB_k the second to the last equation on page 1 of change_of_variables.pdf
     % Because it is the ratio in the change of variables procedure, it cannot be 0

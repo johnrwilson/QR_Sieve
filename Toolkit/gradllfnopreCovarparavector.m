@@ -7,9 +7,9 @@ function [lf,g] = gradllfnopreCovarparavector(sv1,ntau, nsample, nmixtures, yt, 
 
 betamatrix = vec2mat(sv1([1:(ntau*ncovar)]),ntau);
 % Extract the parameters
-%%%  beta0=sv1(1:ntau);
-%%%  beta1=sv1((ntau+1):(2*ntau));
-%%%  beta2=sv1((2*ntau+1):(3*ntau));
+%  beta0=sv1(1:ntau);
+%  beta1=sv1((ntau+1):(2*ntau));
+%  beta2=sv1((2*ntau+1):(3*ntau));
 
 
 ParameterDist=sv1((ntau*ncovar+1):(ntau*ncovar+3*nmixtures));
@@ -32,8 +32,8 @@ gsigma = zeros(nmixtures,1);
 % Initialize the gradient for betas
 gbetamatrix = zeros(ntau,ncovar);
 gbeta0 = zeros(ntau,1);
-%%%   gbeta1 = zeros(ntau,1);
-%%%   gbeta2 = zeros(ntau,1);
+%   gbeta1 = zeros(ntau,1);
+%   gbeta2 = zeros(ntau,1);
 
 % The main loop. Each iteration is for each sample. The formulas in
 % NoteMLE.pdf is for each iteration. Thus the gradient and llf1 are sum of

@@ -2,6 +2,8 @@ clear all;
 
 addpath("../../Toolkit/")
 
+tic;
+
 % This set of code implements the paper's method, using the simulated
 % example from section 4 of the paper. Note that for now, this code only
 % runs serially (not in parallel) so the sample size is much smaller than
@@ -9,11 +11,13 @@ addpath("../../Toolkit/")
 
 % TODO: Improve comments for clarity
 
+rng(1, 'twister')
+
 ntau = 15;
 n_WLS_iter = 40;
 
 % Part B) Preallocation of result variables
-nsample = 100;
+nsample = 100000;
 % number of covariates for the regression
 ncovar = 3;
 %number of mixture components, using mixture of normals
@@ -26,9 +30,8 @@ nvars = ncovar*ntau+3*nmixtures-2;
 %Define some rough lower and upper bounds for (beta,sigma). minimum weight of component=0.01, maximum=1, minimum mean=-10,maximum=10,
 %minimum st.d=0.01,maximum=10
 % beta,lambda,mu,sigma
-lower=[zeros(1,(3*ntau))-1, (zeros(1,(nmixtures-1))+0.001),(zeros(1,(nmixtures-1))-10.01),(zeros(1,nmixtures)+0.01)];
-upper=[(zeros(1,(3*ntau))+3), (zeros(1,(nmixtures-1))*0+1),(zeros(1,(nmixtures-1))+10),ones(1,nmixtures)*10];
-para_dist_default = [[1/3,1/3],[-1,0],[1,1,1]];
+lower = [-1, .001, -10.01, .01];
+upper = [3, 1, 10, 10];
 
 % Constants
 b=1;
@@ -90,20 +93,24 @@ X = [ones(1,nsample); x1r; x2r]';
 
 % TODO: Make sure the code can handle the MLE calculations by running on
 % server
-n_batches = 10;
-n_epochs = 5;
-learning_rate = 0.001;
+n_batches = 50;
+n_epochs = 500;
+learning_rate = 0.00001;
+decay = .999;
     
 do_mle = false;
-
+% 
 % betas_WLS_only = QR_sieve_test_sgd(X, y, ntau, n_WLS_iter, upper, lower, para_dist_default, A, b, do_mle, n_batches, n_epochs, learning_rate);
 
 do_mle = true;
 
-% betas_sgd = QR_sieve_test_sgd(X, y, ntau, n_WLS_iter, upper, lower, para_dist_default, A, b, do_mle, n_batches, n_epochs, learning_rate);
+% [betas_sgd, fit_new] = QR_sieve_test_sgd(X, y, ntau, n_WLS_iter, upper, lower, para_dist_default, A, b, do_mle, n_batches, n_epochs, learning_rate, decay);
+% toc;
+% save("results_sgd_seeded")
+optimizer_settings = {'SGD', n_batches, n_epochs, learning_rate, decay, true};
+% [betas_mle, fit_hat] = QR_sieve(X, y, ntau, n_WLS_iter, upper, lower, nmixtures, A, b, do_mle, optimizer_settings);
 
-[betas_mle, fit_hat] = QR_sieve(X, y, ntau, n_WLS_iter, upper, lower, para_dist_default, A, b, do_mle);
-
+[betas_mle, fit_hat, betas_bootstrap, fit_bootstrap] = QR_sieve(X, y, ntau, n_WLS_iter, upper, lower, nmixtures, A, b, do_mle, optimizer_settings, 1);
 
 
 % TODO: Plot the results in a way comparable to figures 1 and 2 from the

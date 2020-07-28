@@ -17,14 +17,17 @@ start = [1;1;1];
 % start = OLS_results;
 
 n_batches = 100;
-n_epochs = 50;
+n_epochs = 2000;
 learning_rate = .01;
+decay = .9999;
+
+ols_grad(OLS_results, y, X)
 
 f = @(a,b,c) ols_grad(a,b,c);
 
 verbose = true;
 
-opt_sgd = sgd(f, start, y, X, n_batches, n_epochs, learning_rate, verbose);
+opt_sgd = sgd(f, start, y, X, n_batches, n_epochs, learning_rate, decay, verbose);
 
 ols_grad(opt_sgd, y, X)
 ols_grad(beta_true, y, X)
