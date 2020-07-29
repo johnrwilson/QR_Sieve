@@ -4,8 +4,8 @@
 % Haoyang Liu
 % 12/09/2018
 function [betas, fit_hat, betas_bootstrap, fit_hat_bootstrap] = ...
-    QR_sieve(X, y, ntau, n_WLS_iter, upper, lower, nmixtures, A, b, ...
-    do_mle, optimizer, bootstrap)
+    QR_sieve(X, y, ntau, n_WLS_iter, upper, lower, nmixtures, ...
+    do_mle, optimizer, bootstrap, make_plot)
 
 % TODO: Add bootstrapping, saving only full result in array. Like fit_hat
 % only.
@@ -18,6 +18,8 @@ function [betas, fit_hat, betas_bootstrap, fit_hat_bootstrap] = ...
 
 % Question: Currently taugrid_midpoint is not used. Is there another
 % formulation where we use the midpoints and that's why it's calculated?
+% Answer: taugrid_midpoint is used to plot the results of the WLS
+% regression
 
 
 [taugrid, ~, taugrid_ue] = calculate_grid(ntau);
@@ -31,12 +33,16 @@ nvars = ncovar*ntau+3*nmixtures-2;
 % weight, and (3) the std dev. The -2 is because one mean and one weight
 % are pinned down by the other ones.
 
+% Constants
+b=1;
+A = zeros(1,nvars);
+A(ncovar*ntau+1:ncovar*ntau+nmixtures-1) = 1;
+
 lower=[zeros(1,(ncovar*ntau))+lower(1), (zeros(1,(nmixtures-1))+lower(2)), ...
     (zeros(1,(nmixtures-1))+lower(3)),(zeros(1,nmixtures)+lower(4))];
 
 upper=[zeros(1,(ncovar*ntau))+upper(1), (zeros(1,(nmixtures-1))+upper(2)), ...
     (zeros(1,(nmixtures-1))+upper(3)),(zeros(1,nmixtures)+upper(4))];
-
 
 
 % define the starting values for the guess of distributional parameters
@@ -80,6 +86,7 @@ if do_mle
     % G-2) Construct the start value
     [fit_1_temp] = construct_pl_start(beta_WLS_start_sorted, ncovar, ntau);
     start = [fit_1_temp, fit_hat([(end - 3*nmixtures + 3) : end])];
+    start(end-2:end)
 
     if optimizer{1} == "GA"
 
@@ -132,9 +139,95 @@ if bootstrap > 1
         sample_index = randsample(1:nsample, sample_size);
         y_sample = y(sample_index);
         X_sample = X(sample_index, :);
-        [betas_subsample, fit_hat_subsample] = QR_sieve(X, y, ntau, n_WLS_iter, ...
-            upper, lower, nmixtures, A, b, do_mle, optimizer, 1);
+        [betas_subsample, fit_hat_subsample] = QR_sieve(X_sample, y_sample, ntau, n_WLS_iter, ...
+            upper, lower, nmixtures, do_mle, optimizer, 1, false);
         fit_hat_bootstrap(i,:) = fit_hat_subsample
         betas_bootstrap(:,:,i) = betas_subsample
+    end
+    if make_plot
+        betas_std = std(betas_bootstrap, 0, 3);
+        for i = 1:ncovar
+            figure()
+            hold on
+            plot(taugrid_ue, betas(i,:), 'LineWidth', 2)
+            plot(taugrid_ue, betas(i,:) + 1.96 * betas_std(i,:), 'LineWidth', 2)
+            plot(taugrid_ue, betas(i,:) - 1.96 * betas_std(i,:), 'LineWidth', 2)
+            xlabel('$\tau$', 'interpreter', 'latex', 'FontSize', 16)
+            ylabel_text = sprintf("$\\beta_{%d}(\\tau)$", i);
+            ylabel(ylabel_text, 'interpreter', 'latex', 'FontSize', 16);
+        end
+        
+        lambdas_short = fit_hat(ncovar*ntau+1:ncovar*ntau+nmixtures-1);
+        lambdas = [lambdas_short, 1 - sum(lambdas_short)];
+        mus_short = fit_hat(ncovar*ntau+nmixtures:ncovar*ntau+2*nmixtures-2);
+        mus = [mus_short, -sum(lambdas_short.*mus_short)/lambdas(end)];
+        sigmas = fit_hat(nvars-2:nvars);
+        
+        dom_min = min(mus - 3 * sigmas);
+        dom_max = max(mus + 3 * sigmas);
+        n_points = 100;
+        dom = linspace(dom_min, dom_max, n_points);
+        
+        density_y = zeros(1,n_points);
+        
+        for i = 1:nmixtures
+            density_y = density_y + lambdas(i) * normpdf(dom, mus(i), sigmas(i));
+        end
+        
+        density_dist = zeros(bootstrap,n_points);
+        
+        parfor j = 1:bootstrap
+            lambdas_short = fit_hat_bootstrap(j,ncovar*ntau+1:ncovar*ntau+nmixtures-1);
+            lambdas = [lambdas_short, 1 - sum(lambdas_short)]
+            mus_short = fit_hat_bootstrap(j,ncovar*ntau+nmixtures:ncovar*ntau+2*nmixtures-2);
+            mus = [mus_short, -sum(lambdas_short.*mus_short)/lambdas(end)]
+            sigmas = fit_hat_bootstrap(j,nvars-2:nvars)
+            for i = 1:nmixtures
+                density_dist(j,:) = density_dist(j,:) + lambdas(i) * normpdf(dom, mus(i), sigmas(i));
+            end
+        end
+        
+        density_std = std(density_dist);
+        
+        figure()
+        hold on;
+        plot(dom, density_y)
+        xlabel('Measurement Error', 'FontSize', 16)
+        ylabel('Density', 'FontSize', 16);
+        plot(dom, density_y + 1.96 * density_std, 'LineWidth', 2)
+        plot(dom, density_y - 1.96 * density_std, 'LineWidth', 2)
+    end
+    
+else
+    if make_plot
+        for i = 1:ncovar
+            figure()
+            plot(taugrid_ue, betas(i,:), 'LineWidth', 2)
+            xlabel('$\tau$', 'interpreter', 'latex', 'FontSize', 16)
+            ylabel_text = sprintf("$\\beta_{%d}(\\tau)$", i);
+            ylabel(ylabel_text, 'interpreter', 'latex', 'FontSize', 16);
+        end
+        
+        lambdas_short = fit_hat(ncovar*ntau+1:ncovar*ntau+nmixtures-1);
+        lambdas = [lambdas_short, 1 - sum(lambdas_short)];
+        mus_short = fit_hat(ncovar*ntau+nmixtures:ncovar*ntau+2*nmixtures-2);
+        mus = [mus_short, -sum(lambdas_short.*mus_short)/lambdas(end)];
+        sigmas = fit_hat(end-2:end);
+        
+        dom_min = min(mus - 3 * sigmas);
+        dom_max = max(mus + 3 * sigmas);
+        n_points = 100;
+        dom = linspace(dom_min, dom_max, n_points);
+        
+        density_y = zeros(1,n_points);
+        
+        for i = 1:nmixtures
+            density_y = density_y + lambdas(i) * normpdf(dom, mus(i), sigmas(i));
+        end
+        
+        figure()
+        plot(dom, density_y, 'LineWidth', 2)
+        xlabel('Measurement Error', 'FontSize', 16)
+        ylabel('Density', 'FontSize', 16);
     end
 end
