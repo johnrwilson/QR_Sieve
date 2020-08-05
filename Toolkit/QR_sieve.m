@@ -4,8 +4,8 @@
 % Haoyang Liu
 % 12/09/2018
 function [betas, fit_hat, betas_bootstrap, fit_hat_bootstrap] = ...
-    QR_sieve(X, y, ntau, n_WLS_iter, upper, lower, nmixtures, ...
-    do_mle, optimizer, bootstrap, make_plot)
+    QR_sieve(X, y, bootstrap, ntau, nmixtures, n_WLS_iter, lower, upper, ...
+    do_mle, optimizer, make_plot)
 
 % TODO: Add bootstrapping, saving only full result in array. Like fit_hat
 % only.
@@ -21,6 +21,53 @@ function [betas, fit_hat, betas_bootstrap, fit_hat_bootstrap] = ...
 % Answer: taugrid_midpoint is used to plot the results of the WLS
 % regression
 
+if ~exist('make_plot','var') || isempty(make_plot)
+     % last parameter does not exist, so default it to something
+     make_plot = false;
+end
+
+if ~exist('optimizer','var') || isempty(optimizer)
+     % last parameter does not exist, so default it to something
+     n_batches = 30;
+     n_epochs = 1000;
+     learning_rate = .00001;
+     decay = .999;
+     verbose = true;
+     optimizer = {'SGD', n_batches, n_epochs, learning_rate, decay, verbose};
+end
+
+if ~exist('do_mle','var') || isempty(do_mle)
+     % last parameter does not exist, so default it to something
+     do_mle = true;
+end
+
+std_y = std(y);
+if ~exist('upper','var') || isempty(upper)
+     % last parameter does not exist, so default it to something
+     E_y = mean(y);
+     upper = [Inf, 1, E_y + 3 * std_y, 10*std_y];
+end
+
+if ~exist('lower','var') || isempty(lower)
+    % last parameter does not exist, so default it to something
+    E_y = mean(y);
+    lower = [-Inf, .0001, -E_y - 3 * std_y, .01*std_y];
+end
+
+if ~exist('n_WLS_iter','var') || isempty(n_WLS_iter)
+     % last parameter does not exist, so default it to something
+     n_WLS_iter = 40;
+end
+
+if ~exist('nmixtures','var') || isempty(nmixtures)
+     % last parameter does not exist, so default it to something
+     nmixtures = 3;
+end
+
+if ~exist('ntau','var') || isempty(ntau)
+     % last parameter does not exist, so default it to something
+     ntau = 15;
+end
 
 [taugrid, ~, taugrid_ue] = calculate_grid(ntau);
 
@@ -50,13 +97,17 @@ if nmixtures == 1
 
 elseif mod(nmixtures, 2) == 0
     lambda_start = repmat([1/nmixtures], 1, nmixtures-1);
-    mu_start = [repmat([-1], 1, nmixtures/2), repmat([1], 1, nmixtures/2-1)];
-    sigma_start = repmat([1], 1, nmixtures);
+%     sigma_start = repmat([1], 1, nmixtures);
+    sigma_start = repmat([sqrt(.75) * std_y], 1, nmixtures);
+    mu_start = [repmat([-1], 1, nmixtures/2), ...
+        repmat([1], 1, nmixtures/2-1)] * sqrt(.75) * std_y;
     para_dist_default = [lambda_start, mu_start, sigma_start];
 else
     lambda_start = repmat([1/nmixtures], 1, nmixtures-1);
-    mu_start = [repmat([-1], 1, (nmixtures-1)/2), 0, repmat([1], 1, (nmixtures-1)/2-1)];
-    sigma_start = repmat([1], 1, nmixtures);
+%     sigma_start = repmat([1], 1, nmixtures);
+    sigma_start = repmat([sqrt(.75) * std_y], 1, nmixtures);
+    mu_start = [repmat([-1], 1, (nmixtures-1)/2), 0, ...
+        repmat([1], 1, (nmixtures-1)/2-1)] * sqrt(.75) * std_y;
     para_dist_default = [lambda_start, mu_start, sigma_start];
 end
 
@@ -85,8 +136,7 @@ if do_mle
 
     % G-2) Construct the start value
     [fit_1_temp] = construct_pl_start(beta_WLS_start_sorted, ncovar, ntau);
-    start = [fit_1_temp, fit_hat([(end - 3*nmixtures + 3) : end])];
-    start(end-2:end)
+    start = [fit_1_temp, fit_hat([(end - 3*nmixtures + 3) : end])]
 
     if optimizer{1} == "GA"
 
@@ -120,7 +170,7 @@ if do_mle
 else
 
     disp("Returning results from WLS regression.")
-    betas = WLS;
+    betas = reshape(WLS, [ntau, ncovar])';
     fit_hat = WLS;
 
 end
@@ -132,15 +182,14 @@ if bootstrap > 1
     if optimizer{1} == "SGD"
         optimizer{6} = false;
     end
-    sample_size = floor(nsample / bootstrap);
     fit_hat_bootstrap = zeros(bootstrap, nvars);
     betas_bootstrap = zeros(ncovar, ntau, bootstrap);
     parfor i = 1:bootstrap
-        sample_index = randsample(1:nsample, sample_size);
+        sample_index = randsample(1:nsample, nsample, true);
         y_sample = y(sample_index);
         X_sample = X(sample_index, :);
-        [betas_subsample, fit_hat_subsample] = QR_sieve(X_sample, y_sample, ntau, n_WLS_iter, ...
-            upper, lower, nmixtures, do_mle, optimizer, 1, false);
+        [betas_subsample, fit_hat_subsample] = QR_sieve(X, y, 1, ntau, ...
+            nmixtures, n_WLS_iter, lower, upper, do_mle, optimizer, make_plot);
         fit_hat_bootstrap(i,:) = fit_hat_subsample
         betas_bootstrap(:,:,i) = betas_subsample
     end

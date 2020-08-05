@@ -49,7 +49,7 @@ for i = 1:n_epochs
 
     learning_rate = learning_rate * decay;
     
-    if mod(i, 10) == 0
+    if mod(i, 2) == 0
         loss = f(x, y, X);
         if loss < best_loss
             best_loss = loss;

@@ -11,7 +11,7 @@ tic;
 
 % TODO: Improve comments for clarity
 
-rng(1, 'twister')
+rng(10, 'twister')
 
 ntau = 15;
 n_WLS_iter = 40;
@@ -26,18 +26,6 @@ nmixtures = 3;
 nmixtures_truth = 3;
 % nvars is the total number of parameters
 nvars = ncovar*ntau+3*nmixtures-2;
-
-%Define some rough lower and upper bounds for (beta,sigma). minimum weight of component=0.01, maximum=1, minimum mean=-10,maximum=10,
-%minimum st.d=0.01,maximum=10
-% beta,lambda,mu,sigma
-lower = [-1, .001, -10.01, .01];
-upper = [3, 1, 10, 10];
-
-% Constants
-b=1;
-A = zeros(1,nvars);
-A(3*ntau+1) = 1;
-A(3*ntau+2) = 1;
 
 % Part C) true coefficients
 [taugrid, taugrid_midpoint, taugrid_ue] = calculate_grid(ntau);
@@ -88,54 +76,64 @@ y = y';
 
 X = [ones(1,nsample); x1r; x2r]';
 
-% Tell it to skip the MLE calculations for the sake of speed while testing
-% the results.
-
-% TODO: Make sure the code can handle the MLE calculations by running on
-% server
 n_batches = 50;
-n_epochs = 500;
+n_epochs = 50;
 learning_rate = 0.00001;
-decay = .999;
-    
-do_mle = false;
-% 
-% betas_WLS_only = QR_sieve_test_sgd(X, y, ntau, n_WLS_iter, upper, lower, para_dist_default, A, b, do_mle, n_batches, n_epochs, learning_rate);
-
-do_mle = true;
-
-% [betas_sgd, fit_new] = QR_sieve_test_sgd(X, y, ntau, n_WLS_iter, upper, lower, para_dist_default, A, b, do_mle, n_batches, n_epochs, learning_rate, decay);
-% toc;
-% save("results_sgd_seeded")
+decay = .9999;
 optimizer_settings = {'SGD', n_batches, n_epochs, learning_rate, decay, true};
-% [betas_mle, fit_hat] = QR_sieve(X, y, ntau, n_WLS_iter, upper, lower, nmixtures, A, b, do_mle, optimizer_settings);
 
-[betas_mle, fit_hat, betas_bootstrap, fit_bootstrap] = QR_sieve(X, y, ntau, n_WLS_iter, upper, lower, nmixtures, A, b, do_mle, optimizer_settings, 1);
+% lower = [-1, .001, -10, .001];
+% upper = [3, 1, 10, 10];
 
+% [betas_mle, fit_hat, betas_bootstrap, fit_bootstrap] = QR_sieve(X, y, 4, [], [], [], lower, upper, ...
+%     false, optimizer_settings, true);
 
-% TODO: Plot the results in a way comparable to figures 1 and 2 from the
-% paper
+[betas_mle, fit_hat] = QR_sieve(X, y, 1, [], [], 500, [], [], ...
+    true, optimizer_settings, true);
 
-% if pl == 3
-%     x1vector = [0:0.2:2*2.34];
-%     x2vector = 2*2.34*(x1vector/(2*2.34)).^2;
-%   
-%     for j_tau = [2 8 14]
-%         figure; 
-%         hold on; 
-%         plot(x1vector, beta_true(1,j_tau) + beta_true(2,j_tau)*x1vector + beta_true(3,j_tau)*x2vector,'b');
-%         plot(x1vector, beta_qreg_full(1,j_tau) + beta_qreg_full(2,j_tau)*x1vector,'m');
-%         plot(x1vector, beta_qreg_full_1(1,j_tau) + beta_qreg_full_1(2,j_tau)*x1vector,'m--'); 
-%         plot(x1vector, beta_WLS_start_sorted_full(1,j_tau) + beta_WLS_start_sorted_full(2,j_tau)*x1vector,'k'); 
-%         
-%        lgd = legend('truth','quantile regression','quantile regression ystar','piecewise linear(fmincon)');  
-%        c = lgd.Location;
-%        lgd.Location = 'northwest';
-%        title(sprintf('Q-tau(Y|X) tau = %0.1g',taugrid_ue(j_tau)))
-%        print('-dpng','-r200',sprintf('qyx%d',j_tau));
-%  
-%     end
-%  
+%%      
+% figure()
+% plot(taugrid_ue, betas_mle(1,:))
+% title("beta_1")
+% 
+% figure()
+% plot(taugrid_ue, betas_mle(2,:))
+% title("beta_2")
+% 
+% figure()
+% plot(taugrid_ue, betas_mle(3,:))
+% title("beta_3")
+% betas_std = std(betas_bootstrap, 0, 3);
+% 
+% for i = 1:ncovar
+%     figure()
+%     hold on
+%     plot(taugrid_ue, betas_mle(i,:), 'LineWidth', 2)
+%     plot(taugrid_ue, betas_mle(i,:) + 1.96 * betas_std(i,:), '--', 'LineWidth', 2)
+%     plot(taugrid_ue, betas_mle(i,:) - 1.96 * betas_std(i,:), '--', 'LineWidth', 2)
+%     xlabel('$\tau$', 'interpreter', 'latex', 'FontSize', 16)
+%     ylabel_text = sprintf("$\\beta_{%d}(\\tau)$", i);
+%     ylabel(ylabel_text, 'interpreter', 'latex', 'FontSize', 16);
 % end
-
-% plot(betas_mle(2,:))
+% 
+% lambdas_short = fit_hat(ncovar*ntau+1:ncovar*ntau+nmixtures-1);
+% lambdas = [lambdas_short, 1 - sum(lambdas_short)];
+% mus_short = fit_hat(ncovar*ntau+nmixtures:ncovar*ntau+2*nmixtures-2);
+% mus = [mus_short, -sum(lambdas_short.*mus_short)/lambdas(end)];
+% sigmas = fit_hat(end-2:end);
+% 
+% dom_min = min(mus - 3 * sigmas);
+% dom_max = max(mus + 3 * sigmas);
+% n_points = 100;
+% dom = linspace(dom_min, dom_max, n_points);
+% 
+% density_y = zeros(1, n_points);
+% 
+% for i = 1:nmixtures
+%     density_y = density_y + lambdas(i) * normpdf(dom, mus(i), sigmas(i));
+% end
+% 
+% figure()
+% plot(dom, density_y)
+% xlabel('Measurement Error', 'FontSize', 16)
+% ylabel('Density', 'FontSize', 16);
