@@ -17,7 +17,7 @@ ntau = 15;
 n_WLS_iter = 40;
 
 % Part B) Preallocation of result variables
-nsample = 100000;
+nsample = 80000;
 % number of covariates for the regression
 ncovar = 3;
 %number of mixture components, using mixture of normals
@@ -76,11 +76,14 @@ y = y';
 
 X = [ones(1,nsample); x1r; x2r]';
 
-n_batches = 50;
-n_epochs = 50;
-learning_rate = 0.00001;
-decay = .9999;
-optimizer_settings = {'SGD', n_batches, n_epochs, learning_rate, decay, true};
+% n_batches = 50;
+% n_epochs = 1000;
+% learning_rate = 0.00001;
+% decay = .9999;
+% optimizer_settings = {'SGD', n_batches, n_epochs, learning_rate, decay, true};
+
+
+optimizer_settings = {'FM'};
 
 % lower = [-1, .001, -10, .001];
 % upper = [3, 1, 10, 10];
@@ -88,7 +91,7 @@ optimizer_settings = {'SGD', n_batches, n_epochs, learning_rate, decay, true};
 % [betas_mle, fit_hat, betas_bootstrap, fit_bootstrap] = QR_sieve(X, y, 4, [], [], [], lower, upper, ...
 %     false, optimizer_settings, true);
 
-[betas_mle, fit_hat] = QR_sieve(X, y, 1, [], [], 500, [], [], ...
+[betas_mle, fit_hat] = QR_sieve(X, y, 1, [], [], 40, [], [], ...
     true, optimizer_settings, true);
 
 %%      

@@ -60,6 +60,7 @@ for i = 1:n_epochs
         end
         if verbose && mod(i, 50) == 0
             disp(sprintf("| % 5.2d | % 5.6d |   % 5.2d   |", [i, best_loss, norm(gradient * learning_rate)]));
+            x
         end
     end
     

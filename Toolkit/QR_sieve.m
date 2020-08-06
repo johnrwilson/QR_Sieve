@@ -7,20 +7,6 @@ function [betas, fit_hat, betas_bootstrap, fit_hat_bootstrap] = ...
     QR_sieve(X, y, bootstrap, ntau, nmixtures, n_WLS_iter, lower, upper, ...
     do_mle, optimizer, make_plot)
 
-% TODO: Add bootstrapping, saving only full result in array. Like fit_hat
-% only.
-
-% Generate the grid of knots for tau
-
-% taugrid is the old tau grid for quantile regression
-% taugrid_midpoint is the mid point of tau segments
-% taugrid_ue is the new uneven grid
-
-% Question: Currently taugrid_midpoint is not used. Is there another
-% formulation where we use the midpoints and that's why it's calculated?
-% Answer: taugrid_midpoint is used to plot the results of the WLS
-% regression
-
 if ~exist('make_plot','var') || isempty(make_plot)
      % last parameter does not exist, so default it to something
      make_plot = false;
@@ -69,6 +55,11 @@ if ~exist('ntau','var') || isempty(ntau)
      ntau = 15;
 end
 
+% Generate the grid of knots for tau
+
+% taugrid is the old tau grid for quantile regression
+% taugrid_ue is the new uneven grid
+
 [taugrid, ~, taugrid_ue] = calculate_grid(ntau);
 
 nsample = size(X,1);
@@ -97,14 +88,12 @@ if nmixtures == 1
 
 elseif mod(nmixtures, 2) == 0
     lambda_start = repmat([1/nmixtures], 1, nmixtures-1);
-%     sigma_start = repmat([1], 1, nmixtures);
     sigma_start = repmat([sqrt(.75) * std_y], 1, nmixtures);
     mu_start = [repmat([-1], 1, nmixtures/2), ...
         repmat([1], 1, nmixtures/2-1)] * sqrt(.75) * std_y;
     para_dist_default = [lambda_start, mu_start, sigma_start];
 else
     lambda_start = repmat([1/nmixtures], 1, nmixtures-1);
-%     sigma_start = repmat([1], 1, nmixtures);
     sigma_start = repmat([sqrt(.75) * std_y], 1, nmixtures);
     mu_start = [repmat([-1], 1, (nmixtures-1)/2), 0, ...
         repmat([1], 1, (nmixtures-1)/2-1)] * sqrt(.75) * std_y;
@@ -122,6 +111,15 @@ if do_mle
     % Part F) MLE
     start = [WLS, para_dist_default];
     % TODO: Unfreeze the minimizing function
+%     n_batches = 50;
+%     n_epochs = 50;
+%     learning_rate = .00001;
+%     decay = .999;
+%     verbose = true;
+
+%      f = @(x,y,X)gradllfCovarparavector(x, ntau, nmixtures,1,y, X);
+%     [fit_hat] = sgd(f, start, y, X, n_batches, n_epochs, learning_rate, decay, verbose);
+        
     options=optimoptions(@fmincon,'GradObj','on');
     [fit_hat] = fmincon(@(x)gradllfCovarparavector(x, ntau, nmixtures,1,y, X),start,A,b,[],[],lower,upper,[],options);
     disp("Finished first MLE")
@@ -139,12 +137,16 @@ if do_mle
     start = [fit_1_temp, fit_hat([(end - 3*nmixtures + 3) : end])]
 
     if optimizer{1} == "GA"
+        
+        disp("Solving second MLE with genetic algorithm")
 
         opts = optimoptions('ga', 'MaxGenerations', optimizer{2}, 'PopulationSize', optimizer{3});
         opts.InitialPopulationMatrix = start;
         [fit_hat] = ga(@(x)gradl_CDF_Lei_GA_ue(x, taugrid_ue, nmixtures, y', X'), nvars, A, b,[],[],lower,upper,[],opts);
 
     elseif optimizer{1} == "SGD"
+        
+        disp("Solving second MLE with stochastic gradient descent")
 
         n_batches = optimizer{2};
         n_epochs = optimizer{3};
@@ -162,6 +164,24 @@ if do_mle
         f = @(x,y,X) gradl_CDF_Lei_GA_ue(x, taugrid_ue, nmixtures, y', X');
         fit_hat = optimizer{2}(f, start, y, X);
 
+    elseif optimizer{1} == "SA"
+        
+        disp("Solving second MLE with simulated annealing")
+        
+        %TODO: List requirements for custom optimizer here
+
+        f = @(x) gradl_CDF_Lei_GA_ue(x, taugrid_ue, nmixtures, y', X');
+        fit_hat = simulannealbnd(f, start, lower, upper);
+
+    elseif optimizer{1} == "FM"
+        
+        disp("Solving second MLE with fminsearch")
+        
+        %TODO: List requirements for custom optimizer here
+
+        f = @(x) gradl_CDF_Lei_GA_ue(x, taugrid_ue, nmixtures, y', X');
+        fit_hat = fminsearch(f, start);
+    
     end
 
     betas = reconstruct_beta((reshape(fit_hat(1,[1:(ncovar*ntau)]), [ntau, ncovar]))');
