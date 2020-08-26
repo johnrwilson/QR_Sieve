@@ -50,7 +50,7 @@ if nmixtures==1
     gmu =[];
 end
 
-g = [g([1:ntau*ncovar]);glambda;gmu;gsigma];
+g = [g([1:ntau*ncovar]);glambda;gmu;gsigma]';
 
 return;
 
