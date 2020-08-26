@@ -31,13 +31,13 @@ std_y = std(y);
 if ~exist('upper','var') || isempty(upper)
      % last parameter does not exist, so default it to something
      E_y = mean(y);
-     upper = [Inf, 1, E_y + 3 * std_y, 10*std_y];
+     upper = [Inf, 1, E_y + 3 * std_y, 10*std_y]
 end
 
 if ~exist('lower','var') || isempty(lower)
     % last parameter does not exist, so default it to something
     E_y = mean(y);
-    lower = [-Inf, .0001, -E_y - 3 * std_y, .01*std_y];
+    lower = [-Inf, .0001, -E_y - 3 * std_y, .01*std_y]
 end
 
 if ~exist('n_WLS_iter','var') || isempty(n_WLS_iter)
@@ -73,6 +73,7 @@ nvars = ncovar*ntau+3*nmixtures-2;
 
 % Constants
 b=1;
+
 A = zeros(1,nvars);
 A(ncovar*ntau+1:ncovar*ntau+nmixtures-1) = 1;
 
@@ -81,7 +82,6 @@ lower=[zeros(1,(ncovar*ntau))+lower(1), (zeros(1,(nmixtures-1))+lower(2)), ...
 
 upper=[zeros(1,(ncovar*ntau))+upper(1), (zeros(1,(nmixtures-1))+upper(2)), ...
     (zeros(1,(nmixtures-1))+upper(3)),(zeros(1,nmixtures)+upper(4))];
-
 
 % define the starting values for the guess of distributional parameters
 if nmixtures == 1
@@ -121,10 +121,10 @@ if do_mle
 %     [fit_hat] = sgd(f, start, y, X, n_batches, n_epochs, learning_rate, decay, verbose);
         
     options=optimoptions(@fmincon,'GradObj','on');
-    [fit_hat] = fmincon(@(x)gradllfCovarparavector(x, ntau, nmixtures,1,y, X),start,A,b,[],[],lower,upper,[],options);
+    [fit_hat] = fmincon(@(x)gradllfCovarparavector(x, ntau, nmixtures,1,y, X),...
+        start,A,b,[],[],lower,upper,[],options);
+    disp(gradllfCovarparavector(fit_hat, ntau, nmixtures,1,y, X));
     disp("Finished first MLE")
-    betas = (reshape(fit_hat(1,[1:(ncovar*ntau)]), [ntau, ncovar]))';
-
 
     % G) Piecewise linear MLE
     % G-1) Sort piecewise constant result
