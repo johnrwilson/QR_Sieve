@@ -1,0 +1,12 @@
+## Import modules
+import mfr.modelSoln as m
+import numpy as np
+
+## Copy default parameters
+params = m.paramsDefault.copy()
+
+## Modify copied dictionary
+params['nV'] = 50
+params['nWealth'] = 100
+params['sigma_V_norm'] = 0.132
+params['cov21'] = -0.1
