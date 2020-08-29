@@ -1,11 +1,6 @@
-% This version
-% This codes gives a start value to piecewise linear MLE simulations.
-% This version uses GA, instead of fmincon
-% Haoyang Liu
-% 12/09/2018
 function [betas, fit_hat, betas_bootstrap, fit_hat_bootstrap] = ...
-    QR_sieve(X, y, bootstrap, ntau, nmixtures, n_WLS_iter, lower, upper, ...
-    do_mle, optimizer, make_plot)
+    sieve_mle(X, y, bootstrap, ntau, nmixtures, n_WLS_iter, lower, upper, ...
+    optimizer, make_plot)
 
 if ~exist('make_plot','var') || isempty(make_plot)
      % last parameter does not exist, so default it to something
@@ -31,13 +26,13 @@ std_y = std(y);
 if ~exist('upper','var') || isempty(upper)
      % last parameter does not exist, so default it to something
      E_y = mean(y);
-     upper = [Inf, 1, E_y + 3 * std_y, 10*std_y]
+     upper = [10000, 1, E_y + 3 * std_y, 10*std_y]
 end
 
 if ~exist('lower','var') || isempty(lower)
     % last parameter does not exist, so default it to something
     E_y = mean(y);
-    lower = [-Inf, .0001, -E_y - 3 * std_y, .01*std_y]
+    lower = [-10000, .0001, -E_y - 3 * std_y, .01*std_y]
 end
 
 if ~exist('n_WLS_iter','var') || isempty(n_WLS_iter)
@@ -104,13 +99,12 @@ X_mean = mean(X);
 
 % Part E) qreg and WLS
 [fit] = quantlsfVector(X,y,taugrid);
-WLS =  WLS_step(fit,X,y,n_WLS_iter);
+fit = reshape(fit, ncovar*ntau, 1)';
+% WLS =  WLS_step(fit,X,y,n_WLS_iter);
 
-if do_mle
-
-    % Part F) MLE
-    start = [WLS, para_dist_default];
-    % TODO: Unfreeze the minimizing function
+% Part F) MLE
+start = [fit, para_dist_default];
+% TODO: Unfreeze the minimizing function
 %     n_batches = 50;
 %     n_epochs = 50;
 %     learning_rate = .00001;
@@ -119,81 +113,67 @@ if do_mle
 
 %      f = @(x,y,X)gradllfCovarparavector(x, ntau, nmixtures,1,y, X);
 %     [fit_hat] = sgd(f, start, y, X, n_batches, n_epochs, learning_rate, decay, verbose);
-        
-    options=optimoptions(@fmincon,'GradObj','on');
-    [fit_hat] = fmincon(@(x)gradllfCovarparavector(x, ntau, nmixtures,1,y, X),...
-        start,A,b,[],[],lower,upper,[],options);
-    disp(gradllfCovarparavector(fit_hat, ntau, nmixtures,1,y, X));
-    disp("Finished first MLE")
 
-    % G) Piecewise linear MLE
-    % G-1) Sort piecewise constant result
-    WLS_start_reshape = reshape(fit_hat(1:ntau*ncovar),ntau,ncovar);
-    [beta_WLS_start_sorted] = sortbeta_1(X_mean,WLS_start_reshape,ntau,ncovar);
-    beta_WLS_start_sorted = beta_WLS_start_sorted';
+options=optimoptions(@fmincon,'GradObj','on');
+[fit_hat] = fmincon(@(x)gradllfCovarparavector(x, ntau, nmixtures,1,y, X),...
+    start,A,b,[],[],lower,upper,[],options);
+disp(gradllfCovarparavector(fit_hat, ntau, nmixtures,1,y, X));
+disp("Finished first MLE")
 
-    % G-2) Construct the start value
-    [fit_1_temp] = construct_pl_start(beta_WLS_start_sorted, ncovar, ntau);
-    start = [fit_1_temp, fit_hat([(end - 3*nmixtures + 3) : end])]
+% G) Piecewise linear MLE
+% G-1) Sort piecewise constant result
+WLS_start_reshape = reshape(fit_hat(1:ntau*ncovar),ntau,ncovar);
+[beta_WLS_start_sorted] = sortbeta_1(X_mean,WLS_start_reshape,ntau,ncovar);
+beta_WLS_start_sorted = beta_WLS_start_sorted';
 
-    if optimizer{1} == "GA"
-        
-        disp("Solving second MLE with genetic algorithm")
+% G-2) Construct the start value
+[fit_1_temp] = construct_pl_start(beta_WLS_start_sorted, ncovar, ntau);
+lambdas = sqrt(fit_hat([(end - 3*nmixtures + 3) : (end - 2*nmixtures + 1)]));
+start = [fit_1_temp, lambdas, fit_hat([(end - 2*nmixtures + 2) : end])];
 
-        opts = optimoptions('ga', 'MaxGenerations', optimizer{2}, 'PopulationSize', optimizer{3});
-        opts.InitialPopulationMatrix = start;
-        [fit_hat] = ga(@(x)gradl_CDF_Lei_GA_ue(x, taugrid_ue, nmixtures, y', X'), nvars, A, b,[],[],lower,upper,[],opts);
+if optimizer{1} == "GA"
 
-    elseif optimizer{1} == "SGD"
-        
-        disp("Solving second MLE with stochastic gradient descent")
+    disp("Solving second MLE with genetic algorithm")
 
-        n_batches = optimizer{2};
-        n_epochs = optimizer{3};
-        learning_rate = optimizer{4};
-        decay = optimizer{5};
-        verbose = optimizer{6};
+    opts = optimizer{2};
+    opts.InitialPopulationMatrix = start;
+    [fit_hat] = ga(@(x)gradl_CDF_Lei_GA_ue(x, taugrid_ue, nmixtures, y', X'), nvars, A, b,[],[],lower,upper,[],opts);
 
-        f = @(x,y,X) gradl_CDF_Lei_GA_ue(x, taugrid_ue, nmixtures, y', X');
-        [fit_hat] = sgd(f, start, y, X, n_batches, n_epochs, learning_rate, decay, verbose);
-        
-    elseif optimizer{1} == "Custom"
-        
-        %TODO: List requirements for custom optimizer here
+elseif optimizer{1} == "SGD"
 
-        f = @(x,y,X) gradl_CDF_Lei_GA_ue(x, taugrid_ue, nmixtures, y', X');
-        fit_hat = optimizer{2}(f, start, y, X);
+    disp("Solving second MLE with stochastic gradient descent")
 
-    elseif optimizer{1} == "SA"
-        
-        disp("Solving second MLE with simulated annealing")
-        
-        %TODO: List requirements for custom optimizer here
+    n_batches = optimizer{2};
+    n_epochs = optimizer{3};
+    learning_rate = optimizer{4};
+    decay = optimizer{5};
+    verbose = optimizer{6};
 
-        f = @(x) gradl_CDF_Lei_GA_ue(x, taugrid_ue, nmixtures, y', X');
-        fit_hat = simulannealbnd(f, start, lower, upper);
+    f = @(x,y,X) gradl_CDF_Lei_GA_ue_free_lambdas(x, taugrid_ue, nmixtures, y', X');
+    [fit_hat] = sgd(f, start, y, X, n_batches, n_epochs, learning_rate, decay, verbose);
 
-    elseif optimizer{1} == "FM"
-        
-        disp("Solving second MLE with fminsearch")
-        
-        %TODO: List requirements for custom optimizer here
+elseif optimizer{1} == "SA"
 
-        f = @(x) gradl_CDF_Lei_GA_ue(x, taugrid_ue, nmixtures, y', X');
-        fit_hat = fminsearch(f, start);
-    
-    end
+    disp("Solving second MLE with simulated annealing")
 
-    betas = reconstruct_beta((reshape(fit_hat(1,[1:(ncovar*ntau)]), [ntau, ncovar]))');
-    disp("Finished second MLE")
+    %TODO: List requirements for custom optimizer here
 
-else
+    f = @(x) gradl_CDF_Lei_GA_ue(x, taugrid_ue, nmixtures, y', X');
+    fit_hat = simulannealbnd(f, start, lower, upper, optimizer{2});
 
-    disp("Returning results from WLS regression.")
-    betas = reshape(WLS, [ntau, ncovar])';
-    fit_hat = WLS;
+elseif optimizer{1} == "FM"
+
+    disp("Solving second MLE with fminsearch")
+
+    %TODO: List requirements for custom optimizer here
+
+    f = @(x) gradl_CDF_Lei_GA_ue(x, taugrid_ue, nmixtures, y', X');
+    fit_hat = fminsearch(f, start, optimizer{2});
 
 end
+
+betas = reconstruct_beta((reshape(fit_hat(1,[1:(ncovar*ntau)]), [ntau, ncovar]))');
+disp("Finished second MLE")
 
 fit_hat_bootstrap = fit_hat;
 betas_bootstrap = betas;
@@ -209,7 +189,7 @@ if bootstrap > 1
         y_sample = y(sample_index);
         X_sample = X(sample_index, :);
         [betas_subsample, fit_hat_subsample] = QR_sieve(X, y, 1, ntau, ...
-            nmixtures, n_WLS_iter, lower, upper, do_mle, optimizer, make_plot);
+            nmixtures, n_WLS_iter, lower, upper, optimizer, make_plot);
         fit_hat_bootstrap(i,:) = fit_hat_subsample
         betas_bootstrap(:,:,i) = betas_subsample
     end
@@ -226,7 +206,7 @@ if bootstrap > 1
             ylabel(ylabel_text, 'interpreter', 'latex', 'FontSize', 16);
         end
         
-        lambdas_short = fit_hat(ncovar*ntau+1:ncovar*ntau+nmixtures-1);
+        lambdas_short = fit_hat(ncovar*ntau+1:ncovar*ntau+nmixtures-1).^2;
         lambdas = [lambdas_short, 1 - sum(lambdas_short)];
         mus_short = fit_hat(ncovar*ntau+nmixtures:ncovar*ntau+2*nmixtures-2);
         mus = [mus_short, -sum(lambdas_short.*mus_short)/lambdas(end)];
@@ -246,8 +226,8 @@ if bootstrap > 1
         density_dist = zeros(bootstrap,n_points);
         
         parfor j = 1:bootstrap
-            lambdas_short = fit_hat_bootstrap(j,ncovar*ntau+1:ncovar*ntau+nmixtures-1);
-            lambdas = [lambdas_short, 1 - sum(lambdas_short)]
+            lambdas_short = fit_hat_bootstrap(j,ncovar*ntau+1:ncovar*ntau+nmixtures-1).^2;
+            lambdas = [lambdas_short, 1 - sum(lambdas_short)];
             mus_short = fit_hat_bootstrap(j,ncovar*ntau+nmixtures:ncovar*ntau+2*nmixtures-2);
             mus = [mus_short, -sum(lambdas_short.*mus_short)/lambdas(end)]
             sigmas = fit_hat_bootstrap(j,nvars-2:nvars)
@@ -277,7 +257,7 @@ else
             ylabel(ylabel_text, 'interpreter', 'latex', 'FontSize', 16);
         end
         
-        lambdas_short = fit_hat(ncovar*ntau+1:ncovar*ntau+nmixtures-1);
+        lambdas_short = fit_hat(ncovar*ntau+1:ncovar*ntau+nmixtures-1).^2;
         lambdas = [lambdas_short, 1 - sum(lambdas_short)];
         mus_short = fit_hat(ncovar*ntau+nmixtures:ncovar*ntau+2*nmixtures-2);
         mus = [mus_short, -sum(lambdas_short.*mus_short)/lambdas(end)];
