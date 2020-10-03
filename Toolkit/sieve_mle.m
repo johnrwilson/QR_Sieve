@@ -9,7 +9,7 @@ end
 
 if ~exist('optimizer','var') || isempty(optimizer)
      % last parameter does not exist, so default it to something
-     n_batches = 30;
+     n_batches = 50;
      n_epochs = 1000;
      learning_rate = .00001;
      decay = .999;
@@ -26,13 +26,13 @@ std_y = std(y);
 if ~exist('upper','var') || isempty(upper)
      % last parameter does not exist, so default it to something
      E_y = mean(y);
-     upper = [10000, 1, E_y + 3 * std_y, 10*std_y]
+     upper = [10000, 1, E_y + 3 * std_y, 10*std_y];
 end
 
 if ~exist('lower','var') || isempty(lower)
     % last parameter does not exist, so default it to something
     E_y = mean(y);
-    lower = [-10000, .0001, -E_y - 3 * std_y, .01*std_y]
+    lower = [-10000, .0001, -E_y - 3 * std_y, .01*std_y];
 end
 
 if ~exist('n_WLS_iter','var') || isempty(n_WLS_iter)
@@ -99,20 +99,10 @@ X_mean = mean(X);
 
 % Part E) qreg and WLS
 [fit] = quantlsfVector(X,y,taugrid);
-fit = reshape(fit, ncovar*ntau, 1)';
-% WLS =  WLS_step(fit,X,y,n_WLS_iter);
+WLS =  WLS_step(fit,X,y,n_WLS_iter);
 
 % Part F) MLE
-start = [fit, para_dist_default];
-% TODO: Unfreeze the minimizing function
-%     n_batches = 50;
-%     n_epochs = 50;
-%     learning_rate = .00001;
-%     decay = .999;
-%     verbose = true;
-
-%      f = @(x,y,X)gradllfCovarparavector(x, ntau, nmixtures,1,y, X);
-%     [fit_hat] = sgd(f, start, y, X, n_batches, n_epochs, learning_rate, decay, verbose);
+start = [WLS, para_dist_default];
 
 options=optimoptions(@fmincon,'GradObj','on');
 [fit_hat] = fmincon(@(x)gradllfCovarparavector(x, ntau, nmixtures,1,y, X),...

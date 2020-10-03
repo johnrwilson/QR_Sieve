@@ -20,7 +20,7 @@ rng(10, 'twister')
 % Define some parameters for the model to run
 ntau = 15;
 
-nsample = 200000;
+nsample = 100000;
 %number of true components
 nmixtures_truth = 3;
 
@@ -77,24 +77,10 @@ X = [ones(1,nsample); x1r; x2r]';
 % Set up for main toolkit %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Set up the parameters for the optimizer of choice. In this case SGD.
-n_batches = 50;
-n_epochs = 1500;
-learning_rate = 0.00001;
-decay = .99999;
-optimizer_settings = {'SGD', n_batches, n_epochs, learning_rate, decay, true};
-
-% Somewhat contrived endpoints - the code needs to be able to produce
-% accurate results without such an artificial bound on the beta parameters.
+% Establish lower and upper bounds for each variable
 % The order of the variables is [beta, lambda, mu, sigma].
 lower = [-1, .001, -10, .001];
 upper = [3, 1, 10, 10];
 
-% [betas_mle, fit_hat, betas_bootstrap, fit_bootstrap] = QR_sieve(X, y, 1, [], [], [], [], [], ...
-%     [], optimizer_settings, true);
-
-% [betas_mle, fit_hat] = QR_sieve_change_first(X, y, 1, [], [], [], [], [], ...
-%     [], optimizer_settings, true);
-
-[betas_mle, fit_hat] = QR_sieve_experiment(X, y, 1, [], [], [], [], [], ...
-    [], optimizer_settings, true);
+[betas_mle, fit_hat, betas_bootstrap, fit_bootstrap] = sieve_mle(X, y, 1, ...
+                    [], [], [], lower, upper, [], true);

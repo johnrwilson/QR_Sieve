@@ -9,11 +9,7 @@ clear;
 
 addpath("../../Toolkit/")
 
-% data could be Angrist80 to Angrist00, or Jacob10
-data=csvread('Jacob10.csv',1,0);
-% data = [data; csvread('Angrist00.csv',1,0)];
-% data = [data; csvread('Angrist90.csv',1,0)];
-% data = [data; csvread('Angrist80.csv',1,0)];
+data = csvread('census2010.csv',1,0);
 
 % Part B) Load original data & keep WHITE observations
 [X, y] = white_subsample(data);
@@ -24,10 +20,10 @@ lower = [-10000, .001, -10, .01];
 upper = [10000, 1, 10, 10];
 
 n_batches = 50;
-n_epochs = 100;
+n_epochs = 500;
 learning_rate = 0.00001;
 decay = .999;
 
 optimizer_settings = {'SGD', n_batches, n_epochs, learning_rate, decay, true};
 
-[betas_mle, fit_hat, betas_bootstrap, fit_bootstrap] = QR_sieve(X, y, 1, [], [], [], [], [], [], optimizer_settings, true);
+[betas_mle, fit_hat, betas_bootstrap, fit_bootstrap] = sieve_mle(X, y, 1, [], [], [], lower, upper, optimizer_settings, true);

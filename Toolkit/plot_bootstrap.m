@@ -1,4 +1,4 @@
-function plot_bootstrap(betas, fit_hat, fit_bootstrap, betas_bootstrap)
+function plot_bootstrap(betas, fit_hat, betas_bootstrap, fit_hat_bootstrap)
 
 [ncovar, ntau, bootstrap] = size(betas_bootstrap);
 
@@ -17,7 +17,7 @@ for i = 1:ncovar
     ylabel(ylabel_text, 'interpreter', 'latex', 'FontSize', 16);
 end
 
-nmixtures = (size(fit_bootstrap,2) + 2 - ncovar * ntau)/3;
+nmixtures = (size(fit_hat_bootstrap,2) + 2 - ncovar * ntau)/3;
 
 lambdas_short = fit_hat(ncovar*ntau+1:ncovar*ntau+nmixtures-1).^2;
 lambdas = [lambdas_short, 1 - sum(lambdas_short)];
@@ -39,11 +39,11 @@ end
 density_dist = zeros(bootstrap,n_points);
 
 parfor j = 1:bootstrap
-    lambdas_short = fit_bootstrap(j,ncovar*ntau+1:ncovar*ntau+nmixtures-1).^2;
+    lambdas_short = fit_hat_bootstrap(j,ncovar*ntau+1:ncovar*ntau+nmixtures-1).^2;
     lambdas = [lambdas_short, 1 - sum(lambdas_short)]
-    mus_short = fit_bootstrap(j,ncovar*ntau+nmixtures:ncovar*ntau+2*nmixtures-2);
+    mus_short = fit_hat_bootstrap(j,ncovar*ntau+nmixtures:ncovar*ntau+2*nmixtures-2);
     mus = [mus_short, -sum(lambdas_short.*mus_short)/lambdas(end)]
-    sigmas = fit_bootstrap(j,end-2:end)
+    sigmas = fit_hat_bootstrap(j,end-2:end)
     for i = 1:nmixtures
         density_dist(j,:) = density_dist(j,:) + lambdas(i) * normpdf(dom, mus(i), sigmas(i));
     end
