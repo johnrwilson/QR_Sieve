@@ -142,24 +142,6 @@ elseif optimizer{1} == "SGD"
     f = @(x,y,X) gradl_CDF_Lei_GA_ue_free_lambdas(x, taugrid_ue, nmixtures, y', X');
     [fit_hat] = sgd(f, start, y, X, n_batches, n_epochs, learning_rate, decay, verbose);
 
-elseif optimizer{1} == "SA"
-
-    disp("Solving second MLE with simulated annealing")
-
-    %TODO: List requirements for custom optimizer here
-
-    f = @(x) gradl_CDF_Lei_GA_ue(x, taugrid_ue, nmixtures, y', X');
-    fit_hat = simulannealbnd(f, start, lower, upper, optimizer{2});
-
-elseif optimizer{1} == "FM"
-
-    disp("Solving second MLE with fminsearch")
-
-    %TODO: List requirements for custom optimizer here
-
-    f = @(x) gradl_CDF_Lei_GA_ue(x, taugrid_ue, nmixtures, y', X');
-    fit_hat = fminsearch(f, start, optimizer{2});
-
 end
 
 betas = reconstruct_beta((reshape(fit_hat(1,[1:(ncovar*ntau)]), [ntau, ncovar]))');
