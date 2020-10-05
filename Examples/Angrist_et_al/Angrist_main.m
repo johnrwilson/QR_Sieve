@@ -11,7 +11,7 @@ addpath("../../Toolkit/")
 
 data = csvread('census2010.csv',1,0);
 
-% Part B) Load original data & keep WHITE observations
+% Part B) Load original data & keep white observations (need large N for MLE, see NBER version for effects by race x gender)
 [X, y] = white_subsample(data);
 clear data
 
