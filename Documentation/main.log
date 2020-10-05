@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.4.16)  28 AUG 2020 13:37
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.4.16)  5 OCT 2020 13:04
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1278,21 +1278,24 @@ File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <12> not available
 (Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 121.
- [4] [5] [6]
-[7]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 236.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 236.
+
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+[4] [5] [6]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 221.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 221.
  (./main.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 236.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 236.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 221.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 221.
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: 4B2D695ABFB2C52E03D4148113E3FC71;712.
+(rerunfilecheck)             Checksum: 592CC3F4790F1C3725CD10C2FE089A92;713.
  ) 
 Here is how much of TeX's memory you used:
- 29963 strings out of 492649
- 555726 string characters out of 6129622
- 651117 words of memory out of 5000000
- 33396 multiletter control sequences out of 15000+600000
+ 29951 strings out of 492649
+ 555577 string characters out of 6129622
+ 650968 words of memory out of 5000000
+ 33392 multiletter control sequences out of 15000+600000
  541351 words of font info for 64 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  54i,11n,73p,10412b,1917s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -1311,10 +1314,10 @@ ive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/local/texli
 ve/2018/texmf-dist/fonts/type1/public/cm-super/sfrm0700.pfb></usr/local/texlive
 /2018/texmf-dist/fonts/type1/public/cm-super/sfrm1000.pfb></usr/local/texlive/2
 018/texmf-dist/fonts/type1/public/cm-super/sfrm1200.pfb>
-Output written on main.pdf (7 pages, 166591 bytes).
+Output written on main.pdf (6 pages, 164099 bytes).
 PDF statistics:
- 223 PDF objects out of 1000 (max. 8388607)
- 198 compressed objects within 2 object streams
- 64 named destinations out of 1000 (max. 500000)
+ 207 PDF objects out of 1000 (max. 8388607)
+ 183 compressed objects within 2 object streams
+ 56 named destinations out of 1000 (max. 500000)
  109 words of extra memory for PDF output out of 10000 (max. 10000000)
 

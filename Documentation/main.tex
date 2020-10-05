@@ -45,7 +45,7 @@
 
 
 
-\title{QR Sieve Code}
+\title{Sieve MLE Code}
 \author{John Wilson\footnote{The title is rough and once the documentation is complete and approved the paper's authors should appear here}}
 \date{Version: 0.1.1\footnote{If you have any questions, please contact: wilsonjr@mit.edu}}
 
@@ -59,11 +59,11 @@
 
 \section{Introduction}
 
-The QR Sieve toolkit is a set of code designed to accompany the paper \textit{Errors in the Dependent Variable of Quantile Regression Models}, by Jerry Hausman, Haoyang Liu, Ye Luo, and Christopher Palmer. It provides a simple Matlab function to implement the method described in the paper as well as providing some examples of how to use the code. The code is still under development, however the current version is functional and this document will highlight the changes intended for the future of this toolkit.
+The sieve mle toolkit is a set of code designed to accompany the paper \textit{Errors in the Dependent Variable of Quantile Regression Models}, by Jerry Hausman, Haoyang Liu, Ye Luo, and Christopher Palmer. It provides a simple Matlab function to implement the method described in the paper as well as providing some examples of how to use the code. The code is still under development, however the current version is functional and this document will highlight the changes intended for the future of this toolkit.
 
-\section{Main QR Sieve function}
+\section{Main sieve mle function}
 
-The main workhorse of this toolkit is the function \lstinline{QR_sieve} contained in \lstinline{Toolkit/QR_sieve.m} and the helper functions called by this main function. This powerful function has the option to run bootstrapped sampling for inference, and can also be used to plot the results of the regresssions.
+The main workhorse of this toolkit is the function \lstinline{sieve_mle} contained in \lstinline{Toolkit/sieve_mle.m} and the helper functions called by this main function. This powerful function has the option to run bootstrapped sampling for inference, and can also be used to plot the results of the regresssions.
 
 \subsection{Inputs}
 
@@ -189,7 +189,7 @@ Once the function has finished running, it will return four objects:
 
 \section{Plotting Function}
 
-This function contained in \lstinline{Toolkit/plot_bootstrap.m} takes as inputs the results of the QR Sieve function and generates plots. This is useful if the code was run on a server or \lstinline{make_plot} was set to false. The plots that it makes are the same as if \lstinline{make_plot} was set to true, but this function allows you to create the plots again without running the function.
+This function contained in \lstinline{Toolkit/plot_bootstrap.m} takes as inputs the results of the sieve mle function and generates plots. This is useful if the code was run on a server or \lstinline{make_plot} was set to false. The plots that it makes are the same as if \lstinline{make_plot} was set to true, but this function allows you to create the plots again without running the function.
 
 \subsection{Inputs}
 
