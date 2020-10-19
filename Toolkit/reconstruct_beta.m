@@ -1,5 +1,13 @@
-% This function reconstructs beta from alpha
 function [beta] = reconstruct_beta(alpha)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% reconstruct_beta
+% reconstructs beta from alpha
+%
+% Errors in the Dependent Variable of Quantile Regression Models
+%
+% Jerry Hausman, Haoyang Liu, Ye Luo, Christopher Palmer 2020
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     ntau = size(alpha,2);
 
