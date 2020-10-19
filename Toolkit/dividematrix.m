@@ -1,5 +1,15 @@
 function [ begin_index,end_index,index_length ] = dividematrix( nsample,nslice )
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% dividematrix
+% Divide one marix into multiple slices
+%
+% Errors in the Dependent Variable of Quantile Regression Models
+%
+% Jerry Hausman, Haoyang Liu, Ye Luo, Christopher Palmer 2020
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 neachsample = floor(nsample/nslice);
 
 
