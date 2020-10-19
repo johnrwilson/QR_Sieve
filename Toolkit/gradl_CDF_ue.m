@@ -1,6 +1,13 @@
-% Second level function for uneven grid
-% It only makes adjustments for the omitted mixture in the distributional parameters
-function [cdf_lf,cdf_g] = gradl_CDF_Lei_ue(para_Pre, taugrid, nmixtures, Y, X)
+function [cdf_lf,cdf_g] = gradl_CDF_ue(para_Pre, taugrid, nmixtures, Y, X)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% gradl_CDF_ue
+% Calculates the log likelyhood function value
+%
+% Errors in the Dependent Variable of Quantile Regression Models
+%
+% Jerry Hausman, Haoyang Liu, Ye Luo, Christopher Palmer 2020
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     ncbeta = length(taugrid);
     [nocovar,nsample] = size(X);
