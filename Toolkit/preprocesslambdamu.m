@@ -1,5 +1,16 @@
 function [lambda,mu,lambda3] = preprocesslambdamu(lambdapre,mupre)
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% preprocesslambdamu
+% Preprocess the EIV parameters
+%
+% Errors in the Dependent Variable of Quantile Regression Models
+%
+% Jerry Hausman, Haoyang Liu, Ye Luo, Christopher Palmer 2020
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
 % Process lambda
 lambda3 = 1-sum(lambdapre);
 lambda = [lambdapre,lambda3];
