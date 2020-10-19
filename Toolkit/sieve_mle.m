@@ -1,6 +1,15 @@
 function [betas, fit_hat, betas_bootstrap, fit_hat_bootstrap] = ...
     sieve_mle(X, y, bootstrap, ntau, nmixtures, n_WLS_iter, lower, upper, ...
     optimizer, make_plot)
+    
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% sieve_mle
+% Sieve MLE 
+%
+% Errors in the Dependent Variable of Quantile Regression Models
+%
+% Jerry Hausman, Haoyang Liu, Ye Luo, Christopher Palmer 2020
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
 
 if ~exist('make_plot','var') || isempty(make_plot)
      % last parameter does not exist, so default it to something
@@ -127,7 +136,7 @@ if optimizer{1} == "GA"
 
     opts = optimizer{2};
     opts.InitialPopulationMatrix = start;
-    [fit_hat] = ga(@(x)gradl_CDF_Lei_GA_ue(x, taugrid_ue, nmixtures, y', X'), nvars, A, b,[],[],lower,upper,[],opts);
+    [fit_hat] = ga(@(x)gradl_CDF_GA_ue(x, taugrid_ue, nmixtures, y', X'), nvars, A, b,[],[],lower,upper,[],opts);
 
 elseif optimizer{1} == "SGD"
 
@@ -139,7 +148,7 @@ elseif optimizer{1} == "SGD"
     decay = optimizer{5};
     verbose = optimizer{6};
 
-    f = @(x,y,X) gradl_CDF_Lei_GA_ue_free_lambdas(x, taugrid_ue, nmixtures, y', X');
+    f = @(x,y,X) gradl_CDF_GA_ue_free_lambdas(x, taugrid_ue, nmixtures, y', X');
     [fit_hat] = sgd(f, start, y, X, n_batches, n_epochs, learning_rate, decay, verbose);
 
 end
