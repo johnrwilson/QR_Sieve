@@ -1,5 +1,15 @@
 function [fit_1_temp] = construct_pl_start(beta_WLS_start_sorted, ncovar, ntau)
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% construct_pl_start
+% Construct the start value in the piecewise-linear estimator
+%
+% Errors in the Dependent Variable of Quantile Regression Models
+%
+% Jerry Hausman, Haoyang Liu, Ye Luo, Christopher Palmer 2020
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 beta_WLS_start_sorted(:, 1) = beta_WLS_start_sorted(:, 1) - 1/2*(beta_WLS_start_sorted(:, 2) - beta_WLS_start_sorted(:, 1));
 beta_WLS_start_sorted(:, end) = beta_WLS_start_sorted(:, end) + 1/2*(beta_WLS_start_sorted(:, end) - beta_WLS_start_sorted(:, end-1));
 
