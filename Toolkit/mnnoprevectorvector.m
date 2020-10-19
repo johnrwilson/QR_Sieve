@@ -1,4 +1,14 @@
 function result = mnnoprevectorvector(r_matrix,ParameterDist,nmixtures)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% mnnoprevectorvector
+% Parse parameter vector for a mixture of normals
+%
+% Errors in the Dependent Variable of Quantile Regression Models
+%
+% Jerry Hausman, Haoyang Liu, Ye Luo, Christopher Palmer 2020
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %mn1 defined as function of mixing probability
 
 % Preprocessed lambda. Lambda=weights of components, only need to specify
