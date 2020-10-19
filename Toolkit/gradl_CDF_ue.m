@@ -28,7 +28,7 @@ function [cdf_lf,cdf_g] = gradl_CDF_ue(para_Pre, taugrid, nmixtures, Y, X)
     
     ParameterDist_nopre = [lambda, mu, sigma]; 
     
-    [cdf_lf, cdf_g] = gradl_CDF_nopre_Lei_1_ue(para, ParameterDist_nopre, taugrid, nmixtures, nocovar, nsample, Y, X);
+    [cdf_lf, cdf_g] = gradl_CDF_nopre_1_ue(para, ParameterDist_nopre, taugrid, nmixtures, nocovar, nsample, Y, X);
     
     glambdaall = cdf_g([(nocovar*ncbeta+1):(nocovar*ncbeta+nmixtures)])';
     gmuall     = cdf_g([(nocovar*ncbeta+nmixtures+1):(nocovar*ncbeta+2*nmixtures)])';
