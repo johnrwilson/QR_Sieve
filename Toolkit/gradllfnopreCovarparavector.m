@@ -1,8 +1,13 @@
 function [lf,g] = gradllfnopreCovarparavector(sv1,ntau, nsample, nmixtures, yt, X)
-% Calculate the gradient of llf1
-% To Calculate the gradient of llf1, it is necessary to calculate llf1. So
-% might as well add llf1 as an output to this function.
-%log-likelihood function, defined as llf1.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% gradllfnopreCovarparavector
+% Operationalize calculation of the gradient of the log likelihood function
+%
+% Errors in the Dependent Variable of Quantile Regression Models
+%
+% Jerry Hausman, Haoyang Liu, Ye Luo, Christopher Palmer 2020
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 [temp,ncovar] = size(X);
 
 betamatrix = vec2mat(sv1([1:(ntau*ncovar)]),ntau);
