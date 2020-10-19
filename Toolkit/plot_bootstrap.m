@@ -1,5 +1,14 @@
 function plot_bootstrap(betas, fit_hat, betas_bootstrap, fit_hat_bootstrap)
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% plot_bootstrap
+% Plot bootstrap results
+%
+% Errors in the Dependent Variable of Quantile Regression Models
+%
+% Jerry Hausman, Haoyang Liu, Ye Luo, Christopher Palmer 2020
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 [ncovar, ntau, bootstrap] = size(betas_bootstrap);
 
 betas_std = std(betas_bootstrap, 0, 3);
