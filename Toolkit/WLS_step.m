@@ -1,5 +1,14 @@
 function [recorder_WLS,recorder_WLS_sort, real_recorder_WLS] = WLS_step(fit_qreg,X,y,n_WLS_iter)
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% WLS_step
+% WLS iterations before MLE
+%
+% Errors in the Dependent Variable of Quantile Regression Models
+%
+% Jerry Hausman, Haoyang Liu, Ye Luo, Christopher Palmer 2020
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 [ntau,ncovar] = size(fit_qreg);
 nsample = length(y);
 Y = repmat(y, [1 ntau]);
