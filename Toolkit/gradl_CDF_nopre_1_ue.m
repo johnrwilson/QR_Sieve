@@ -1,5 +1,13 @@
-% Third level function for uneven grid
-function [cdf_lf, cdf_g] = gradl_CDF_nopre_Lei_1_ue(para, ParameterDist_nopre, taugrid, nmixtures, nocovar, N, Y, X)
+function [cdf_lf, cdf_g] = gradl_CDF_nopre_1_ue(para, ParameterDist_nopre, taugrid, nmixtures, nocovar, N, Y, X)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% gradl_CDF_nopre_1_ue
+% Operationalize calculation of log likelihood function
+%
+% Errors in the Dependent Variable of Quantile Regression Models
+%
+% Jerry Hausman, Haoyang Liu, Ye Luo, Christopher Palmer 2020
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     % A) Construct erroreach sample
     ntau = length(taugrid)-1;
