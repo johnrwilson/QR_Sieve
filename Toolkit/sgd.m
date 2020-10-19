@@ -1,5 +1,14 @@
-% This is a rough outline of the Stochastic Gradient Descent function
 function [opt_x] = sgd(f, start, y, X, n_batches, n_epochs, learning_rate, decay, verbose)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% sgd
+% An outline of the Stochastic Gradient Descent function
+%
+% Errors in the Dependent Variable of Quantile Regression Models
+%
+% Jerry Hausman, Haoyang Liu, Ye Luo, Christopher Palmer 2020
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 % f must be a function of x, y, and X and must return [level, gradient]
 sample_size = round(size(y,1) / n_batches);
