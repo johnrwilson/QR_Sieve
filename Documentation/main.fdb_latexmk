@@ -1,5 +1,5 @@
 # Fdb version 3
-["pdflatex"] 1603160300 "main.tex" "main.pdf" "main" 1603160301
+["pdflatex"] 1603160622 "main.tex" "main.pdf" "main" 1603160622
   "/usr/local/texlive/2018/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc" 1480098666 2900 1537cc8184ad1792082cd229ecc269f4 ""
   "/usr/local/texlive/2018/texmf-dist/fonts/map/fontname/texfonts.map" 1511824771 3332 103109f5612ad95229751940c61aada0 ""
   "/usr/local/texlive/2018/texmf-dist/fonts/tfm/jknappen/ec/ectt1000.tfm" 1480098696 1536 06717a2b50de47d4087ac0e6cd759455 ""
@@ -184,14 +184,14 @@
   "/usr/local/texlive/2018/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1523934492 2717033 f61a5287d9c22a39a74f1979fe3f905c ""
   "/usr/local/texlive/2018/texmf-var/web2c/pdftex/pdflatex.fmt" 1523934516 4220280 10cab8fbd7c5a7c52aba9917e190d018 ""
   "/usr/local/texlive/2018/texmf.cnf" 1523934483 577 0b39adfd7c93507ff20c9c14c2f1a33f ""
-  "main.aux" 1603160300 2227 42f71a9376c77a22b4143b75ebc2b68c ""
-  "main.out" 1603160300 713 592cc3f4790f1c3725cd10c2fe089a92 ""
-  "main.tex" 1603160299 14163 de9874d2fee1aab9a5883a7e3d86814c ""
-  "main.toc" 1603160300 918 c6895c7d0abcde398efc09b763c9fcab ""
+  "main.aux" 1603160622 2227 42f71a9376c77a22b4143b75ebc2b68c ""
+  "main.out" 1603160622 713 592cc3f4790f1c3725cd10c2fe089a92 ""
+  "main.tex" 1603160621 14157 6525797aae876a2a2eea09ec295f360d ""
+  "main.toc" 1603160622 918 c6895c7d0abcde398efc09b763c9fcab ""
   (generated)
   "main.aux"
-  "main.out"
-  "main.toc"
-  "main.log"
   "main.pdf"
+  "main.out"
+  "main.log"
+  "main.toc"
   "main.pyg"
