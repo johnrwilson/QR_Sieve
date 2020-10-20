@@ -148,7 +148,7 @@ elseif optimizer{1} == "SGD"
     decay = optimizer{5};
     verbose = optimizer{6};
 
-    f = @(x,y,X) gradl_CDF_GA_ue_free_lambdas(x, taugrid_ue, nmixtures, y', X');
+    f = @(x,y,X) gradl_CDF_SGD_ue(x, taugrid_ue, nmixtures, y', X');
     [fit_hat] = sgd(f, start, y, X, n_batches, n_epochs, learning_rate, decay, verbose);
 
 end

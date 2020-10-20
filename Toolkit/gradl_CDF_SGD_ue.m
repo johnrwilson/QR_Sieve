@@ -1,13 +1,6 @@
-function [cdf_lf,cdf_g] = gradl_CDF_GA_ue(para_GA, taugrid, nmixtures, Y, X)
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% gradl_CDF_GA_ue
-% Calculates the likelihood value and gradient for an uneven grid
-%
-% Errors in the Dependent Variable of Quantile Regression Models
-%
-% Jerry Hausman, Haoyang Liu, Ye Luo, Christopher Palmer 2020
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This function calculates the likelihood value and gradient for an uneven grid
+% First level function
+function [cdf_lf,cdf_g] = gradl_CDF_SGD_ue(para_GA, taugrid, nmixtures, Y, X)
 
     % Get number of covariates
     [nocovar,~] = size(X);
@@ -33,7 +26,7 @@ function [cdf_lf,cdf_g] = gradl_CDF_GA_ue(para_GA, taugrid, nmixtures, Y, X)
 
 
     % Part B) Evaluate the log likelihood value and gradients
-    [cdf_lf,cdf_g_Lei] = gradl_CDF_ue(para_Pre, taugrid, nmixtures, Y, X);
+    [cdf_lf,cdf_g_Lei] = gradl_CDF_ue_free_lambdas(para_Pre, taugrid, nmixtures, Y, X);
 
     
     % Part C) Set the gradients
